@@ -42,6 +42,7 @@ namespace MagicVilla_VillaAPI.Controllers
             if (id == 0)
             {
                 _logger.LogError("Get Villa Error with Id " + id);
+                
                 return BadRequest();
             }
             VillaDTO villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
