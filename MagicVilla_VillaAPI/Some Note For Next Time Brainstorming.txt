@@ -3,7 +3,7 @@
 Patch Method: Need 2 packages for supported Patch Method.
 There are 1. Microsoft.AspNetCore.JsonPatch
 		  2. Microsoft.AspNetCore.Mvc.NewtonsoftJson
-
+And must use [ApiController] Attribute over the Api Controller for Patch Method. Otherwise is not working.
 
 
 Program.cs file
@@ -14,9 +14,9 @@ Note: Normal Controller define.
 2. builder.Services.AddControllers().AddNewtonsoftJson();
 Note: Patch Action Method call for NewtonsoftJson Configuration.
 
-3. builder.Services.AddControllers(option => option.ReturnHttpNotAcceptable = true).AddNewtonsoftJson();
+3. builder.Services.AddControllers(option => {option.ReturnHttpNotAcceptable = true;}).AddNewtonsoftJson();
 Note: always Api return json data. You not allow other data like as XML, HTML, Text etc. So You can Apply ReturnHttpNotAcceptable = true. Then always return Json data.
 
-4. builder.Services.AddControllers(option => option.ReturnHttpNotAcceptable = true).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+4. builder.Services.AddControllers(option => {option.ReturnHttpNotAcceptable = true;}).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerializerFormatters()"
 
