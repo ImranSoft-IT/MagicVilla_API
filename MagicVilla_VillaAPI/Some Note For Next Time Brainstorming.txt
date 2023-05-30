@@ -20,3 +20,26 @@ Note: always Api return json data. You not allow other data like as XML, HTML, T
 4. builder.Services.AddControllers(option => {option.ReturnHttpNotAcceptable = true;}).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerializerFormatters()"
 
+
+5. For Database Migrate install the package : Microsoft.EntityFrameworkCore.Tools
+
+6. For Sql server Intregrate install the package : Microsoft.EntityFrameworkCore.SqlServer
+
+7. Database migration Command: add-migration addVillaTable
+
+8. Database update command: update-database
+
+9. Patch model : [
+                  {
+
+                    "path": "/details",
+                    "op": "replace",
+                    "value": "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim."
+                  }
+                ]
+
+10. 
+
+
+
+
