@@ -1,4 +1,5 @@
-﻿using MagicVilla_VillaAPI.Data;
+﻿using AutoMapper;
+using MagicVilla_VillaAPI.Data;
 using MagicVilla_VillaAPI.Models;
 using MagicVilla_VillaAPI.Models.Dto;
 using Microsoft.AspNetCore.Http;
@@ -15,24 +16,29 @@ namespace MagicVilla_VillaAPI.Controllers
     {
         private readonly ILogger<VillaAPIController> _logger;
         private readonly ApplicationDbContext _context;
-        public VillaAPIController(ILogger<VillaAPIController> logger, ApplicationDbContext context)
+        private readonly IMapper _mapper;
+        public VillaAPIController(ILogger<VillaAPIController> logger, ApplicationDbContext context, IMapper mapper)
         {
             _logger = logger;
             _context = context;
-
+            _mapper = mapper;
         }
 
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<VillaDTO>> GetVillas() 
+        public async Task<ActionResult<IEnumerable<VillaDTO>>> GetVillas() 
         {
             _logger.LogInformation("Getting all villas");
 
             //var villas = VillaStore.villaList;
 
-            List<Villa> villas = _context.Villas.ToList();
-            return Ok(villas);
+            List<Villa> villas = await _context.Villas.ToListAsync();
+
+            var villaMap  = _mapper.Map<List<VillaDTO>>(villas); /*Auto Mapper*/
+
+
+            return Ok(villaMap);
         }
 
         [HttpGet("{id:int}", Name = "GetVilla")]
@@ -43,7 +49,7 @@ namespace MagicVilla_VillaAPI.Controllers
         //[ProducesResponseType(200, Type = typeof(VillaDTO))]  // We can definte Response type herdcoded.
         //[ProducesResponseType(400)]
         //[ProducesResponseType(404)]
-        public ActionResult GetVilla(int id)
+        public async Task<ActionResult> GetVilla(int id)
         {
             if (id == 0)
             {
@@ -53,12 +59,12 @@ namespace MagicVilla_VillaAPI.Controllers
             }
             //VillaDTO villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
 
-            Villa villa = _context.Villas.FirstOrDefault(n => n.Id == id);
-
+            Villa villa = await _context.Villas.FirstOrDefaultAsync(n => n.Id == id);
             if (villa == null) 
             {
                 return NotFound();
             }
+
             return Ok(villa);
         }
 
@@ -66,7 +72,7 @@ namespace MagicVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<VillaDTO> CreateVilla([FromBody] VillaDTO villaDTO)
+        public async Task<ActionResult<VillaDTO>> CreateVilla([FromBody] VillaCreateDTO createDTO)
         {
             // Explicitly Check the model state when we not use [ApiController] attribute. 
             // when we add [ApiController] attribute then Data validation check ApiController before Model State. So we use [ApiController] attribute then no need to check model state.
@@ -82,53 +88,55 @@ namespace MagicVilla_VillaAPI.Controllers
             //    return BadRequest(ModelState);
             //}
 
-            if (_context.Villas.FirstOrDefault(x => x.Name.ToLower() == villaDTO.Name.ToLower()) != null) //Custom Vaidation
+            if (await _context.Villas.FirstOrDefaultAsync(x => x.Name.ToLower() == createDTO.Name.ToLower()) != null) //Custom Vaidation
             {
                 ModelState.AddModelError("CustomError", "Villa Already Exists!");
                 return BadRequest(ModelState);
             }
 
-            if (villaDTO == null) 
+            if (createDTO == null) 
             { 
-                return BadRequest(villaDTO); 
+                return BadRequest(createDTO); 
             }
-            if (villaDTO.Id > 0)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            //if (villaDTO.Id > 0)
+            //{
+            //    return StatusCode(StatusCodes.Status500InternalServerError);
+            //}
 
             //villaDTO.Id = VillaStore.villaList.OrderByDescending(x => x.Id).FirstOrDefault().Id + 1;
             //VillaStore.villaList.Add(villaDTO);
 
-            Villa model = new()
-            {
-                Id = villaDTO.Id,
-                Name = villaDTO.Name,
-                Details = villaDTO.Details,
-                Occupancy = villaDTO.Occupancy,
-                Rate = villaDTO.Rate,
-                Sqft = villaDTO.Sqft,
-                ImageUrl = villaDTO.ImageUrl,
-                Amenity = villaDTO.Amenity
-            };
-            _context.Villas.Add(model);
-            _context.SaveChanges();
+            Villa model = _mapper.Map<Villa>(createDTO); /*Auto Mapper*/
+
+            //Villa model = new()
+            //{
+            //    Name = createDTO.Name,
+            //    Details = createDTO.Details,
+            //    Occupancy = createDTO.Occupancy,
+            //    Rate = createDTO.Rate,
+            //    Sqft = createDTO.Sqft,
+            //    ImageUrl = createDTO.ImageUrl,
+            //    Amenity = createDTO.Amenity
+            //};
+            await _context.Villas.AddAsync(model);
+            await _context.SaveChangesAsync();
 
             //return Ok(villaDTO);
-            return CreatedAtRoute("GetVilla", new { id = villaDTO.Id }, villaDTO);   // call  GetVilla(int id) api
+            return CreatedAtRoute("GetVilla", new { id = model.Id }, model);   // call  GetVilla(int id) api
         }
         [HttpDelete("{id:int}", Name ="DeleteVilla")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public IActionResult DeleteVilla(int id)
+        public async Task<IActionResult> DeleteVilla(int id)
         {
             if (id == 0)
             {
                 return BadRequest();
             }
             //VillaDTO villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
-            Villa villa = _context.Villas.FirstOrDefault(x => x.Id == id);
+
+            Villa villa = await _context.Villas.FirstOrDefaultAsync(x => x.Id == id);
             if (villa == null)
             {
                 return NotFound(villa);
@@ -136,16 +144,16 @@ namespace MagicVilla_VillaAPI.Controllers
             //VillaStore.villaList.Remove(villa);
 
             _context.Villas.Remove(villa);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
         [HttpPut("{id:int}", Name = "UpdateVilla")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public IActionResult UpdateVilla(int id, [FromBody] VillaDTO villaDTO)
+        public async Task<IActionResult> UpdateVilla(int id, [FromBody] VillaUpdateDTO updateDTO)
         {
-            if (villaDTO == null || id != villaDTO.Id)
+            if (updateDTO == null || id != updateDTO.Id)
             {
                 return BadRequest();
             }
@@ -154,19 +162,21 @@ namespace MagicVilla_VillaAPI.Controllers
             //villa.Sqft = villaDTO.Sqft;
             //villa.Occupancy = villaDTO.Occupancy;
 
-            Villa model = new()
-            {
-                Id = villaDTO.Id,
-                Name = villaDTO.Name,
-                Details = villaDTO.Details,
-                Occupancy = villaDTO.Occupancy,
-                Rate = villaDTO.Rate,
-                Sqft = villaDTO.Sqft,
-                ImageUrl = villaDTO.ImageUrl,
-                Amenity = villaDTO.Amenity
-            };
+            Villa model = _mapper.Map<Villa>(updateDTO); /*Auto Mapper*/
+
+            //Villa model = new()
+            //{
+            //    Id = updateDTO.Id,
+            //    Name = updateDTO.Name,
+            //    Details = updateDTO.Details,
+            //    Occupancy = updateDTO.Occupancy,
+            //    Rate = updateDTO.Rate,
+            //    Sqft = updateDTO.Sqft,
+            //    ImageUrl = updateDTO.ImageUrl,
+            //    Amenity = updateDTO.Amenity
+            //};
             _context.Villas.Update(model);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -177,7 +187,7 @@ namespace MagicVilla_VillaAPI.Controllers
         [HttpPatch("{id:int}", Name = "UpdatePartialVilla")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public IActionResult UpdatePartialVilla(int id, JsonPatchDocument<VillaDTO> patchDTO)
+        public async Task<IActionResult> UpdatePartialVilla(int id, JsonPatchDocument<VillaUpdateDTO> patchDTO)
         {
             if (patchDTO == null || id == 0)
             {
@@ -185,41 +195,45 @@ namespace MagicVilla_VillaAPI.Controllers
             }
             //var villa = VillaStore.villaList.FirstOrDefault(n => n.Id == id);
 
-            Villa villa = _context.Villas.AsNoTracking().FirstOrDefault(n => n.Id == id);
+            Villa villa = await _context.Villas.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
             if (villa == null)
             {
                 return BadRequest();
             }
 
-            VillaDTO villaDTO = new()
-            {
-                Id = villa.Id,
-                Name = villa.Name,
-                Details = villa.Details,
-                Occupancy = villa.Occupancy,
-                Rate = villa.Rate,
-                Sqft = villa.Sqft,
-                ImageUrl = villa.ImageUrl,
-                Amenity = villa.Amenity
-            };
+            VillaUpdateDTO villaDTO = _mapper.Map<VillaUpdateDTO>(villa); /*Auto Mapper*/
+
+            //VillaUpdateDTO villaDTO = new()
+            //{
+            //    Id = villa.Id,
+            //    Name = villa.Name,
+            //    Details = villa.Details,
+            //    Occupancy = villa.Occupancy,
+            //    Rate = villa.Rate,
+            //    Sqft = villa.Sqft,
+            //    ImageUrl = villa.ImageUrl,
+            //    Amenity = villa.Amenity
+            //};
 
             //patchDTO.ApplyTo(villa, ModelState);
 
             patchDTO.ApplyTo(villaDTO, ModelState);
 
-            Villa model = new()
-            {
-                Id = villaDTO.Id,
-                Name = villaDTO.Name,
-                Details = villaDTO.Details,
-                Occupancy = villaDTO.Occupancy,
-                Rate = villaDTO.Rate,
-                Sqft = villaDTO.Sqft,
-                ImageUrl = villaDTO.ImageUrl,
-                Amenity = villaDTO.Amenity
-            };
+            Villa model = _mapper.Map<Villa>(villaDTO); /*Auto Mapper*/
+
+            //Villa model = new()
+            //{
+            //    Id = villaDTO.Id,
+            //    Name = villaDTO.Name,
+            //    Details = villaDTO.Details,
+            //    Occupancy = villaDTO.Occupancy,
+            //    Rate = villaDTO.Rate,
+            //    Sqft = villaDTO.Sqft,
+            //    ImageUrl = villaDTO.ImageUrl,
+            //    Amenity = villaDTO.Amenity
+            //};
             _context.Villas.Update(model);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             if (!ModelState.IsValid)
             {

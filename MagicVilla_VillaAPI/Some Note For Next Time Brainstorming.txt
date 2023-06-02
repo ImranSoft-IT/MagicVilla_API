@@ -1,8 +1,8 @@
 
 
 Patch Method: Need 2 packages for supported Patch Method.
-There are 1. Microsoft.AspNetCore.JsonPatch
-		  2. Microsoft.AspNetCore.Mvc.NewtonsoftJson
+There are 1. Microsoft.AspNetCore.JsonPatch [Version: 7.0.5]
+		  2. Microsoft.AspNetCore.Mvc.NewtonsoftJson [Version: 7.0.5]
 And must use [ApiController] Attribute over the Api Controller for Patch Method. Otherwise is not working.
 
 
@@ -21,9 +21,9 @@ Note: always Api return json data. You not allow other data like as XML, HTML, T
 Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerializerFormatters()"
 
 
-5. For Database Migrate install the package : Microsoft.EntityFrameworkCore.Tools
+5. For Database Migrate install the package : Microsoft.EntityFrameworkCore.Tools [Version: 7.0.5]
 
-6. For Sql server Intregrate install the package : Microsoft.EntityFrameworkCore.SqlServer
+6. For Sql server Intregrate install the package : Microsoft.EntityFrameworkCore.SqlServer [Version: 7.0.5]
 
 7. Database migration Command: add-migration addVillaTable
 
@@ -38,7 +38,16 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
                   }
                 ]
 
-10. 
+10. When we use AutoMapper then we need to install 2 package.
+    There are: 1. AutoMapper [Version: 12.0.1]
+               3. AutoMapper.Extensions.Microsoft.Dependen [Version: 12.0.1]
+
+
+11. AutoMapper package installed after We need to create a "MappingConfig.cs" file for auto map. And this file register in "Program.cs" file.
+    Example: builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+12.
+
 
 
 
