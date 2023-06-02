@@ -46,7 +46,7 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
 11. AutoMapper package installed after We need to create a "MappingConfig.cs" file for auto map. And this file register in "Program.cs" file.
     Example: builder.Services.AddAutoMapper(typeof(MappingConfig));
 
-12.
+12. AutoMapper Most common Condition : We ensure two model Field names are the same.
 
 
 
