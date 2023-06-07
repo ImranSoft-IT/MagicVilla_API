@@ -183,7 +183,6 @@ namespace MagicVilla_VillaAPI.Controllers
 
                 return _response;
             }
-
         }
         [HttpDelete("{id:int}", Name = "DeleteVilla")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]  // We can definte Response type without herdcoded.
