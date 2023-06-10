@@ -49,6 +49,23 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
 12. AutoMapper Most common Condition : We ensure two model Field names are the same.
 
 
+13. Two Project run at a time: i. select the project solution
+                              ii. right click the mouse and select "Configure Startup Projects"
+                             iii. Select "Multiple startup Projects" -> Action change None to Start
+                              iv. then click Apply and click Ok.
 
+14. How to add Project Reference? MagicVilla_Web project have to do refer MagicVilla_Utility project.
+    step  i. right click the MagicVilla_Web project
+         ii. then click Add -> Project Reference
+        iii. then select "MagicVilla_Utility" and then click OK.
+
+15. We can modify localhost and port in 'launchSettings.json' file.
+
+16. When we call api in the project.
+    Step:  i. appsettings.json file open and add BaseUrl.
+          ii. then configure [string villaUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");] in the service class dependency injection "VillaService.cs"
+         iii. And register [builder.Services.AddHttpClient<IVillaService, VillaService>();] in programs.cs file.
+
+17. 
 
 
