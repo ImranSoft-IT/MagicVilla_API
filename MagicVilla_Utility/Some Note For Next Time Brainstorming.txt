@@ -66,6 +66,13 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
           ii. then configure [string villaUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");] in the service class dependency injection "VillaService.cs"
          iii. And register [builder.Services.AddHttpClient<IVillaService, VillaService>();] in programs.cs file.
 
-17. 
+17. Sweetalert2 include in the project.
+    Step:  i. url: https://sweetalert2.github.io/
+          ii. copy cdn from url and create a partial view in Shared folder name is '_Notification.cshtml'. Then paste the CDN.
+         iii. then setup alert as well as '_Notification.cshtml' view. 
+          iv. Configuer the _layout.cshtml view include '<partial name="_Notification" />' in body tag. And CDN enter under the _layout.cshtml view page.
+           v. And TempData["success"] or TempData["error"] message send from Controller action method.
+
+19. 
 
 
