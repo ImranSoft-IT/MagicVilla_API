@@ -73,6 +73,16 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
           iv. Configuer the _layout.cshtml view include '<partial name="_Notification" />' in body tag. And CDN enter under the _layout.cshtml view page.
            v. And TempData["success"] or TempData["error"] message send from Controller action method.
 
-19. 
-
+19. JWT Token generate secret key and configuration process.
+    i. "ApiSettings": {
+            "Secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET"
+        }
+        (Add 'appssettings.json' file)
+    ii. and repository dependency injection and keep the secret key a private property.
+        example: private string secretKey;
+                 public UserRepository(ApplicationDbContext db, IConfiguration configuration)
+                 {
+                     _db = db;
+                     secretKey = configuration.GetValue<string>("ApiSettings:Secret");
+                 }
 
