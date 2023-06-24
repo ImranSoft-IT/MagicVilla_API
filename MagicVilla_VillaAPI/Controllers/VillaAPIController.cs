@@ -33,7 +33,6 @@ namespace MagicVilla_VillaAPI.Controllers
 
 
         [HttpGet]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -65,8 +64,7 @@ namespace MagicVilla_VillaAPI.Controllers
 
         }
 
-        [HttpGet("{id:int}", Name = "GetVilla")]
-        [Authorize(Roles ="admin")]
+        [HttpGet("{id:int}", Name = "GetVilla")]        
         //[HttpGet("id")]
         [ProducesResponseType(StatusCodes.Status200OK)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -113,7 +111,7 @@ namespace MagicVilla_VillaAPI.Controllers
             }
 
         }
-
+        [Authorize(Roles = "admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -192,7 +190,7 @@ namespace MagicVilla_VillaAPI.Controllers
             }
         }
         [HttpDelete("{id:int}", Name = "DeleteVilla")]
-        [Authorize(Roles ="CUSTOM")]
+        [Authorize(Roles = "admin")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -237,6 +235,7 @@ namespace MagicVilla_VillaAPI.Controllers
                 return _response;
             }
         }
+        [Authorize(Roles = "admin")]
         [HttpPut("{id:int}", Name = "UpdateVilla")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]  // We can definte Response type without herdcoded.
         [ProducesResponseType(StatusCodes.Status204NoContent)]

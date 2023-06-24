@@ -143,3 +143,32 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
         });
 
 
+22. Login and we have to add session in Programs.cs file.(web project)
+    builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddSession(options =>
+    {
+        options.IdleTimeout = TimeSpan.FromMinutes(100);
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+    });
+
+    And session in AuthController.cs Login action method: HttpContext.Session.SetString(SD.SessionToken, model.Token);
+    And Session Logout and session set in Logout action method: await HttpContext.SignOutAsync();
+                                                                HttpContext.Session.SetString(SD.SessionToken, "");
+
+23. When we want httpContext access in any view page. then we need to inject Accessor.
+     example: @inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpAcc
+     then we access: httpAcc.HttpContext.Session.GetString(SD.SessionToken);
+     (life example in Web Project _Layout.cshtml page.)
+
+24. 
+
+
+
+
+
+
+
+
+
+
