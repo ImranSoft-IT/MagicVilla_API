@@ -10,10 +10,12 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using System.Data;
 using System.Net;
 
-namespace MagicVilla_VillaAPI.Controllers
+namespace MagicVilla_VillaAPI.Controllers.v1
 {
-    [Route("api/VillaNumberAPI")]
+    [Route("api/v{version:apiVersion}/VillaNumberAPI")]
     [ApiController]
+    [ApiVersion("1.0", Deprecated = true)]
+    //[ApiVersion("2.0")]
     public class VillaNumberAPIController : ControllerBase
     {
         private readonly IVillaNumberRepository _villaNumberRepository;
@@ -30,7 +32,14 @@ namespace MagicVilla_VillaAPI.Controllers
             _villaRepository = villaRepository;
         }
 
+        [HttpGet("GetString")]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "string1", "string2" };
+        }
+
         [HttpGet]
+        //[MapToApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetVillaNumbers()
         {
@@ -38,7 +47,7 @@ namespace MagicVilla_VillaAPI.Controllers
             {
                 _logger.LogInformation("Getting all villas");
 
-                List<VillaNumber> villas = await _villaNumberRepository.GetAllAsync(includeProperties:"Villa");
+                List<VillaNumber> villas = await _villaNumberRepository.GetAllAsync(includeProperties: "Villa");
 
                 _response.Result = _mapper.Map<List<VillaNumberDTO>>(villas);
                 _response.StatusCode = HttpStatusCode.OK;
@@ -58,8 +67,9 @@ namespace MagicVilla_VillaAPI.Controllers
 
         }
 
+
         [HttpGet("{id:int}", Name = "GetVillaNumber")]
-        [ProducesResponseType(StatusCodes.Status200OK)]  
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<APIResponse>> GetVillaNumber(int id)

@@ -29,7 +29,7 @@ namespace MagicVilla_Web.Controllers
             List<VillaNumberDTO> villaNumbersList = new();
 
             var response = await _villaNumberService.GetAllAsync<APIResponse>(HttpContext.Session.GetString(SD.SessionToken));
-            if (response != null || response.IsSuccess)
+            if (response != null && response.IsSuccess)
             {
                 villaNumbersList = JsonConvert.DeserializeObject<List<VillaNumberDTO>>(Convert.ToString(response.Result));
             }
@@ -42,7 +42,7 @@ namespace MagicVilla_Web.Controllers
             VillaNumberCreateVM villaNumbersVM = new();
 
             var response = await _villaService.GetAllAsync<APIResponse>(HttpContext.Session.GetString(SD.SessionToken));
-            if (response != null || response.IsSuccess)
+            if (response != null && response.IsSuccess)
             {
                 villaNumbersVM.VillaList = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(response.Result)).Select(i => new SelectListItem
                 {

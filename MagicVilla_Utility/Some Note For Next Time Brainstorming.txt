@@ -161,14 +161,167 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
      then we access: httpAcc.HttpContext.Session.GetString(SD.SessionToken);
      (life example in Web Project _Layout.cshtml page.)
 
-24. 
+24. When we login then we generate a token and we do HttpContext.SignIn exeample: var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+                                                                                    identity.AddClaim(new Claim(ClaimTypes.Name, model.User.UserName));
+                                                                                    identity.AddClaim(new Claim(ClaimTypes.Role, model.User.Role));
+                                                                                    var principal = new ClaimsPrincipal(identity);
+                                                                                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+    AND
+    Then We set session, example: HttpContext.Session.SetString(SD.SessionToken, model.Token);
+    AND
+    We use [Authorize(Roles ="admin")] attribute Web controller and API Controller.
+
+    Then we Access Role wise permission every action method. Thank you.
+
+25. API Versioning:
+    We need two package install for Version controlling.
+    Right click the MagicVilla_VillaApI project and select NuGet Package. and install two packages.
+        i. Microsoft.AspNetCore.Mvc.Versioning [Version: 5.1.0]
+        ii. Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer [Version: 5.1.0]
+
+    
+    Second Step: We need to register ApiVersioning in Programs.cs file.
+                Ex:- builder.Services.AddApiVersioning(); /*** When we use this then all api mendetory for versioning configuration. ***/
+                So we can bypass this. 
+                Ex: builder.Services.AddApiVersioning(options =>{
+                        options.AssumeDefaultVersionWhenUnspecified = true;
+                        options.DefaultApiVersion = new ApiVersion(1, 0);  /**1 is major version and 0 is minor version**/
+                    });
+
+    Thired Step: Then Use [ApiVersion("1.0")] attribute top of the VillaNumberController class.
+                 NOTE: But Remember major version and minor version are same as register versioning in programs.cs file. Like as (1,0) and (1.0)
+
+    Fourth Step: Multiple Version in same Controller
+                i. Add to attribute top of the controller class. 1. [ApiVersion("1.0")]
+                                                                 2. [ApiVersion("2.0")]
+
+                ii. And Route modify for the versioning --- [Route("api/v{version:apiVersion}/VillaNumberAPI")]
+                iii. Action mehtod use [MapToApiVersion("1.0")] and [MapToApiVersion("2.0")] attribute example: 
+                                                        [HttpGet]
+                                                        [MapToApiVersion("1.0")]
+                                                        [ProducesResponseType(StatusCodes.Status200OK)]
+                                                        public async Task<ActionResult<APIResponse>> GetVillaNumbers()
+                                                        {
+                                                            try
+                                                            {
+                                                                _logger.LogInformation("Getting all villas");
+
+                                                                List<VillaNumber> villas = await _villaNumberRepository.GetAllAsync(includeProperties:"Villa");
+
+                                                                _response.Result = _mapper.Map<List<VillaNumberDTO>>(villas);
+                                                                _response.StatusCode = HttpStatusCode.OK;
+
+                                                                return Ok(_response);
+                                                            }
+                                                            catch (Exception ex)
+                                                            {
+                                                                _response.IsSuccess = false;
+                                                                _response.ErrorMessages = new List<string>()
+                                                                {
+                                                                    ex.ToString()
+                                                                };
+
+                                                                return _response;
+                                                            }
+
+                                                        }
+
+                                                        [HttpGet]
+                                                        [MapToApiVersion("2.0")]
+                                                        public IEnumerable<string> Get()
+                                                        {
+                                                            return new string[] { "Value1", "Value2" };
+                                                        }
+                iv. register in programs.cs file: 
+                        builder.Services.AddVersionedApiExplorer(options =>
+                        {
+                            options.GroupNameFormat = "'v'VVV";
+                        });
+
+                v. We want to see which version api run or "api-supported-versions: 1.0" then add "options.ReportApiVersions = true;" in AddApiVersioning services in Programs.cs file.
+                vi. If we want api-supported-version default run then we need to configure "options.SubstituteApiVersionInUrl = true;" in builder.Services.AddVersionedApiExplorer services in Program.cs file.
 
 
+26. Swagger document Version control register under "builder.Services.AddSwaggerGen" method in Program.cs file.
+        i. options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1.0",
+                Title= "Magic Villa",
+                Description = "API to manage Villa",
+                TermsOfService = new Uri("https://example.com/terms"),
+                Contact = new OpenApiContact
+                {
+                    Name = "Dotnetmastery",
+                    Url= new Uri("https://dotnetmastery.com")
+                },
+                License = new OpenApiLicense
+                {
+                    Name = "Example License",
+                    Url = new Uri("https://example.com/license")
+                }
+            });
+
+        ii. And configure under "app.UseSwaggerUI" method in program.cs file
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Magic_VillaV1");
+            });
+
+    OR
+    Configuration Multiple version then we add........
+        i. options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1.0",
+                Title= "Magic Villa V1",
+                Description = "API to manage Villa",
+                TermsOfService = new Uri("https://example.com/terms"),
+                Contact = new OpenApiContact
+                {
+                    Name = "Dotnetmastery",
+                    Url= new Uri("https://dotnetmastery.com")
+                },
+                License = new OpenApiLicense
+                {
+                    Name = "Example License",
+                    Url = new Uri("https://example.com/license")
+                }
+            });
+            options.SwaggerDoc("v2", new OpenApiInfo
+            {
+                Version = "v2.0",
+                Title = "Magic Villa V2",
+                Description = "API to manage Villa",
+                TermsOfService = new Uri("https://example.com/terms"),
+                Contact = new OpenApiContact
+                {
+                    Name = "Dotnetmastery",
+                    Url = new Uri("https://dotnetmastery.com")
+                },
+                License = new OpenApiLicense
+                {
+                    Name = "Example License",
+                    Url = new Uri("https://example.com/license")
+                }
+            });
+
+        ii. app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Magic_VillaV1");
+                options.SwaggerEndpoint("/swagger/v2/swagger.json", "Magic_VillaV2");
+            });
 
 
+27. Api Version Neutral: 
+    When we want one controller access multiple version then use [ApiVersionNeutral] instead of [ApiVersion("1.0")].
+    (you can follow UsersController.cs).
 
 
+28. Api Version Depreciating:
+    I add "[ApiVersion("1.0", Deprecated = true)]" top of the v1 VillaNumberAPIController.cs 
+    and response headers: api-deprecated-versions: 1.0 
+                          api-supported-versions: 2.0 
 
+29. 
 
 
 
