@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Text.Json;
 
 namespace MagicVilla_VillaAPI.Controllers.v1
 {
@@ -35,10 +36,12 @@ namespace MagicVilla_VillaAPI.Controllers.v1
 
 
         [HttpGet]
+        //[ResponseCache(Duration = 30)]
+        [ResponseCache(CacheProfileName = "Default30")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<APIResponse>> GetVillas()
+        public async Task<ActionResult<APIResponse>> GetVillas([FromQuery(Name ="filterOccupancy")] int? occupancy, [FromQuery] string? search, int pageSize = 0, int pageNumber = 1)
         {
             try
             {
@@ -46,7 +49,23 @@ namespace MagicVilla_VillaAPI.Controllers.v1
 
                 //var villas = VillaStore.villaList;
 
-                List<Villa> villas = await _villaRepository.GetAllAsync();
+                IEnumerable<Villa> villas;
+                if (occupancy > 0)
+                {
+                    villas = await _villaRepository.GetAllAsync(n => n.Occupancy == occupancy, pageSize:pageSize, pageNumber:pageNumber);
+                }
+                else
+                {
+                    villas = await _villaRepository.GetAllAsync(pageSize: pageSize, pageNumber: pageNumber);
+                }
+                if (!string.IsNullOrEmpty(search))
+                {
+                    search = search.ToLower();
+                    villas = villas.Where(n => n.Name.ToLower().Contains(search));
+                }
+                Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
+
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
 
                 _response.Result = _mapper.Map<List<VillaDTO>>(villas); /*Auto Mapper*/
                 _response.StatusCode = HttpStatusCode.OK;
@@ -66,6 +85,7 @@ namespace MagicVilla_VillaAPI.Controllers.v1
 
         }
 
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         [HttpGet("{id:int}", Name = "GetVilla")]
         //[HttpGet("id")]
         [ProducesResponseType(StatusCodes.Status200OK)]  // We can definte Response type without herdcoded.

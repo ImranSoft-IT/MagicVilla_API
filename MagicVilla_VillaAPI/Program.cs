@@ -19,6 +19,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
 });
 
+// Api Response Caching register
+builder.Services.AddResponseCaching();
+
 #region ========= Service Register/Dependency Injection ==========
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVillaRepository, VillaRepository>();
@@ -66,7 +69,11 @@ builder.Services.AddAuthentication(x =>
 
 #endregion
 
-builder.Services.AddControllers(option => { 
+builder.Services.AddControllers(option => {
+    option.CacheProfiles.Add("Default30", new CacheProfile()
+    {
+        Duration = 30
+    });
     //option.ReturnHttpNotAcceptable = true; 
 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters(); // AddNewtonsoftJson() add for json supproted. Nuget Package is Microsoft.AspNetCore.Mvc.NewtonsoftJson.
 

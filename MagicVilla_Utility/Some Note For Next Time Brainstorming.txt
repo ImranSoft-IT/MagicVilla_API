@@ -321,7 +321,21 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
     and response headers: api-deprecated-versions: 1.0 
                           api-supported-versions: 2.0 
 
-29. 
+29. Add Api Response Caching: 
+        i. register "builder.Services.AddResponseCaching();" in program.cs file.
+        ii. add "[ResponseCache(Duration = 30)]" attribute in action method. (see VillaApiController.cs)
+
+
+30. Caching Profile:
+        i. add controller services in program.cs file: option.CacheProfiles.Add("Default30", new CacheProfile()
+                                                        {
+                                                            Duration = 30
+                                                        });
+        ii. add "[ResponseCache(CacheProfileName = "Default30")]" attribute in action method. (see VillaApiController.cs)
+
+
+31. 
+
 
 
 
