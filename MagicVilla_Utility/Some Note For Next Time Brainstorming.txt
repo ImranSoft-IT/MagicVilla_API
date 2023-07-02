@@ -334,8 +334,29 @@ Note: And You can Allow json and Xml data then you add "AddXmlDataContractSerial
         ii. add "[ResponseCache(CacheProfileName = "Default30")]" attribute in action method. (see VillaApiController.cs)
 
 
-31. 
+31. DOT NET Identity configure:
+        i. Install nuget package "Microsoft.AspNetCore.Identity.EntityFrameworkCore" version:[7.0.8]
+        ii. Create a model class (ApplicationUser) and inherite 'IdentityUser' class
+        iii. service configure => builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>(); in Program.cs file.
+        iv. Change ApplicationDbContext class inherite 'IdentityDbContext<ApplicationUser>' transition 'DbContext'
+            And add dbset. "public DbSet<ApplicationUser> ApplicationUsers { get; set; }"
+        v. Add "base.OnModelCreating(modelBuilder);" inside OnModelCreating Method in ApplicationDbContext class.
+        vi. Migration command "add-migration AddIdentityUserTable" and then command "update-database".
 
 
+32. Dot Net Identity Apply applicaiton:
+        i. add Private property and dependency injection in UserRepository class.
+            example: private readonly UserManager<ApplicationUser> _userManager;
+                     public UserRepository(ApplicationDbContext db, IConfiguration configuration, UserManager<ApplicationUser> userManager)
+                     {
+                        _db = db;
+                        secretKey = configuration.GetValue<string>("ApiSettings:Secret"); /*** For JWT Token Security key ***/
+                        _userManager = userManager;
+                     }
+
+        ii. Modify IsUniqueUser method => add ApplicationUsers entity transition LocalUsers entity.
+        iii. Create 'UserDTO' class LocalUser er poriborte. And LoginResponseDTO.cs modify.
+        iv. AutoMapper Configure "CreateMap<ApplicationUser, UserDTO>().ReverseMap();"
+        v. Modify "Login" method.
 
 
